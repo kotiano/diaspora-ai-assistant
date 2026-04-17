@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Kenyan Diaspora — Task Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <div>
+    <h1 class="page-title">Task Dashboard</h1>
+    <p class="page-sub">{{ tasks|length }} task{% if tasks|length != 1 %}s{% endif %} total</p>
+  </div>
+  <a href="/" class="action-btn primary">+ New Request</a>
+</div>
+
+<!-- Filter bar -->
+<div class="filter-bar">
+  <button class="filter-btn active" data-filter="all">All</button>
+  <button class="filter-btn" data-filter="Pending">Pending</button>
+  <button class="filter-btn" data-filter="In Progress">In Progress</button>
+  <button class="filter-btn" data-filter="Completed">Completed</button>
+</div>
+
+{% if tasks %}
+<div class="task-grid" id="taskGrid">
+  {% for task in tasks %}
+  <div class="task-card" data-status="{{ task.status }}" data-task-id="{{ task.id }}">
+    <div class="task-card-header">
+      <div class="task-card-left">
+        <span class="task-code">{{ task.task_code }}</span>
+        <span class="intent-tag intent-{{ task.intent }}">{{ task.intent | replace('_', ' ') }}</span>
+      </div>
+      <span class="risk-badge risk-{{ task.risk_label }}">
+        {{ task.risk_label }} risk · {{ task.risk_score }}
+      </span>
+    </div>
+
+    <p class="task-request">{{ task.original_request }}</p>
+
+    <div class="task-meta">
+      <span class="meta-item"> {{ task.assigned_team }}</span>
+      <span class="meta-item"> {{ task.created_at.strftime('%d %b %Y, %H:%M') if task.created_at else '—' }}</span>
+    </div>
+
+    <div class="task-card-footer">
+      <div class="status-control">
+        <span class="status-label">Status:</span>
+        <select class="status-select status-{{ task.status | lower | replace(' ', '-') }}"
+                data-task-id="{{ task.id }}"
+                onchange="updateStatus({{ task.id }}, this.value, this)">
+          <option value="Pending" {% if task.status == 'Pending' %}selected{% endif %}>Pending</option>
+          <option value="In Progress" {% if task.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+          <option value="Completed" {% if task.status == 'Completed' %}selected{% endif %}>Completed</option>
+        </select>
+      </div>
+      <button class="detail-btn" onclick="openDetail({{ task.id }})">View Details</button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">◈</div>
+  <h2>No tasks yet</h2>
+  <p>Submit your first request to get started.</p>
+  <a href="/" class="action-btn primary">Make a Request</a>
+</div>
+{% endif %}
+
+<!-- Detail modal -->
+<div id="detailModal" class="modal-overlay hidden" onclick="closeModal(event)">
+  <div class="modal-box">
+    <button class="modal-close" onclick="document.getElementById('detailModal').classList.add('hidden')">✕</button>
+    <div id="modalContent" class="modal-content">
+      <div class="modal-loading">Loading…</div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

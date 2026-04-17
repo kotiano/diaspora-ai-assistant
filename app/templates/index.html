@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Kenyan Diaspora Send a Request{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+  <div class="hero-text">
+    <span class="hero-badge">Kenyan Diaspora Services</span>
+    <h1 class="hero-title">What do you need done<br><span class="title-accent">back home?</span></h1>
+    <p class="hero-sub">Send money, hire services, verify documents — tell us in plain English and our AI assistant will handle the rest.</p>
+  </div>
+
+  <div class="request-card">
+    <div class="card-header">
+      <span>New Service Request</span>
+    </div>
+    <div class="card-body">
+      <div class="example-pills">
+        <span class="pill-label">Try an example:</span>
+        <button class="example-pill" data-text="I need to send KES 25,000 to my mother in Kisumu urgently. Her name is Grace Otieno.">💸 Send Money</button>
+        <button class="example-pill" data-text="Please verify my land title deed for the plot in Karen, Nairobi. I suspect there may be an issue.">📋 Verify Land Title</button>
+        <button class="example-pill" data-text="Can someone clean my apartment in Westlands on Friday afternoon? It's a 2-bedroom.">🧹 Hire Cleaner</button>
+        <button class="example-pill" data-text="I need an airport transfer from JKIA to the CBD on 22nd April at 6 AM.">🚗 Airport Transfer</button>
+      </div>
+
+      <div class="input-group">
+        <textarea
+          id="requestInput"
+          class="request-textarea"
+          placeholder="Type your request here… e.g. 'I need to send KES 15,000 to my sister in Mombasa'"
+          rows="4"
+          maxlength="1000"
+        ></textarea>
+        <div class="input-footer">
+          <span id="charCount" class="char-count">0 / 1000</span>
+          <button id="submitBtn" class="submit-btn">
+            <span class="btn-text">Process Request</span>
+            <span class="btn-icon">→</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="errorBanner" class="error-banner hidden"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Result panel -->
+<div id="resultPanel" class="result-panel hidden">
+  <div class="result-header">
+    <div class="result-status-dot"></div>
+    <h2>Task Created Successfully</h2>
+    <span id="resultTaskCode" class="task-code-badge"></span>
+  </div>
+
+  <div class="result-grid">
+    <!-- Intent + Risk -->
+    <div class="result-card">
+      <h3 class="result-card-title">Analysis</h3>
+      <div class="detail-row"><span>Intent</span><span id="resultIntent" class="intent-tag"></span></div>
+      <div class="detail-row"><span>Risk Score</span><span id="resultRisk" class="risk-badge"></span></div>
+      <div class="detail-row"><span>Assigned To</span><span id="resultTeam" class="team-tag"></span></div>
+    </div>
+
+    <!-- Entities -->
+    <div class="result-card">
+      <h3 class="result-card-title">Extracted Details</h3>
+      <div id="resultEntities" class="entities-list"></div>
+    </div>
+
+    <!-- Steps -->
+    <div class="result-card full-width">
+      <h3 class="result-card-title">Fulfilment Steps</h3>
+      <ol id="resultSteps" class="steps-list"></ol>
+    </div>
+
+    <!-- Messages -->
+    <div class="result-card full-width">
+      <h3 class="result-card-title">Confirmation Messages</h3>
+      <div class="message-tabs">
+        <button class="msg-tab active" data-channel="whatsapp">WhatsApp</button>
+        <button class="msg-tab" data-channel="email">Email</button>
+        <button class="msg-tab" data-channel="sms">SMS</button>
+      </div>
+      <div id="messageDisplay" class="message-display"></div>
+    </div>
+  </div>
+
+  <div class="result-actions">
+    <button class="action-btn secondary" onclick="document.getElementById('requestInput').value=''; document.getElementById('resultPanel').classList.add('hidden'); document.getElementById('requestInput').focus()">
+      New Request
+    </button>
+    <a href="/tasks" class="action-btn primary">View Dashboard →</a>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/request.js') }}"></script>
+{% endblock %}
