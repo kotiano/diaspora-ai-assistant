@@ -4,6 +4,8 @@ from datetime import datetime, timezone, timedelta
 
 from app import db
 
+EAT = timezone(timedelta(hours=3))
+
 
 def _utcnow():
     return datetime.now(timezone.utc)
@@ -12,6 +14,14 @@ def _utcnow():
 def _generate_task_code():
     """VG-XXXXXXXX — short enough for SMS, unique enough for lookup."""
     return f"VG-{uuid.uuid4().hex[:8].upper()}"
+
+def _to_eat(dt):
+
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(EAT).isoformat()
 
 
 class Task(db.Model):
@@ -33,6 +43,10 @@ class Task(db.Model):
     messages       = db.relationship("TaskMessage",   back_populates="task", cascade="all, delete-orphan")
     status_history = db.relationship("StatusHistory", back_populates="task", cascade="all, delete-orphan", order_by="StatusHistory.changed_at")
 
+    @property
+    def created_at_eat(self):
+        return _to_eat(self.created_at)
+    
     def _messages_dict(self):
         result = {}
         for m in self.messages:
@@ -42,17 +56,6 @@ class Task(db.Model):
         return result
 
     def to_dict(self):
-        # Convert UTC to Kenya Time (EAT = UTC+3)
-        created_at_local = None
-        if self.created_at:
-            # Convert to East Africa Time
-            eat = timezone(timedelta(hours=3))
-            created_at_local = self.created_at.astimezone(eat).isoformat()
-
-        updated_at_local = None
-        if self.updated_at:
-            eat = timezone(timedelta(hours=3))
-            updated_at_local = self.updated_at.astimezone(eat).isoformat()
 
         return {
             "id":               self.id,
@@ -64,8 +67,8 @@ class Task(db.Model):
             "risk_label":       self.risk_label,
             "assigned_team":    self.assigned_team,
             "status":           self.status,
-            "created_at":       created_at_local,           # ← Now in EAT
-            "updated_at":       updated_at_local,
+            "created_at":       _to_eat(self.created_at),
+            "updated_at":       _to_eat(self.updated_at),
             "steps":            [s.to_dict() for s in self.steps],
             "messages":         self._messages_dict(),
             "status_history":   [h.to_dict() for h in self.status_history],

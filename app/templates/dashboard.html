@@ -36,7 +36,7 @@
 
     <div class="task-meta">
       <span class="meta-item"> {{ task.assigned_team }}</span>
-      <span class="meta-item"> {{ task.created_at.strftime('%d %b %Y, %H:%M') if task.created_at else '—' }}</span>
+      <span class="meta-item"> {{ task.created_at_eat[:16] | replace('T', ' ') if task.created_at_eat else '—' }}</span>
     </div>
 
     <div class="task-card-footer">
