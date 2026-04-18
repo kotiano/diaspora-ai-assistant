@@ -1,6 +1,6 @@
 import json
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 from app import db
 
@@ -42,6 +42,18 @@ class Task(db.Model):
         return result
 
     def to_dict(self):
+        # Convert UTC to Kenya Time (EAT = UTC+3)
+        created_at_local = None
+        if self.created_at:
+            # Convert to East Africa Time
+            eat = timezone(timedelta(hours=3))
+            created_at_local = self.created_at.astimezone(eat).isoformat()
+
+        updated_at_local = None
+        if self.updated_at:
+            eat = timezone(timedelta(hours=3))
+            updated_at_local = self.updated_at.astimezone(eat).isoformat()
+
         return {
             "id":               self.id,
             "task_code":        self.task_code,
@@ -52,8 +64,8 @@ class Task(db.Model):
             "risk_label":       self.risk_label,
             "assigned_team":    self.assigned_team,
             "status":           self.status,
-            "created_at":       self.created_at.isoformat() if self.created_at else None,
-            "updated_at":       self.updated_at.isoformat() if self.updated_at else None,
+            "created_at":       created_at_local,           # ← Now in EAT
+            "updated_at":       updated_at_local,
             "steps":            [s.to_dict() for s in self.steps],
             "messages":         self._messages_dict(),
             "status_history":   [h.to_dict() for h in self.status_history],
